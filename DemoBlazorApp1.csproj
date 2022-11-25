@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CenterSpace.NMath" Version="6.2.0.58" />
+    <PackageReference Include="CenterSpace.NMath.Standard.Windows.X64" Version="7.4.0.13" />
+  </ItemGroup>
+
+</Project>

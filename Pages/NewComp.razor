@@ -1,0 +1,106 @@
+﻿@page "/NewComp"
+
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage ProtectedLocalStore
+@inject ProtectedSessionStorage ProtectedSessionStore
+@inject NavigationManager uriHelper;
+@using System.Threading;
+@using CenterSpace.NMath.Core;
+
+<h1>Welcome to my latest Counter.</h1>
+<h4>Under development.</h4>
+<br>
+<br>
+
+@if (isConnected)
+{
+    <p>Current number: <strong>@currentCount</strong></p>
+    <p>Current changes count: <strong>@currentCount2</strong></p>
+    <button class="btn btn-primary" @onclick="IncrementCount">Add</button>
+    <button class="btn btn-primary" @onclick="DecrementCount">Sub</button>
+    <button class="btn btn-primary" @onclick="Setzero">Zero</button>
+    <button class="btn btn-primary" @onclick="integralf">Integral</button>
+    <br>
+
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    private int currentCount;
+    private bool isConnected;
+    private int currentCount2;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var timer = new Timer(new TimerCallback(_ =>
+            {
+                LoadStateAsync();
+                /*uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);*/
+            }), null, 2000, 2000);
+        }
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isConnected = true;
+            await LoadStateAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadStateAsync()
+    {
+        var result = await ProtectedLocalStore.GetAsync<int>("count");
+        currentCount = result.Success ? result.Value : 0;
+        var result2 = await ProtectedSessionStore.GetAsync<int>("count2");
+        currentCount2 = result2.Success ? result2.Value : 0;
+    }
+
+    private async Task IncrementCount()
+    {
+        currentCount++;
+        await ProtectedLocalStore.SetAsync("count", currentCount);
+        currentCount2++;
+        await ProtectedSessionStore.SetAsync("count2", currentCount2);
+    }
+
+    private async Task DecrementCount()
+    {
+        currentCount--;
+        await ProtectedLocalStore.SetAsync("count", currentCount);
+        currentCount2++;
+        await ProtectedSessionStore.SetAsync("count2", currentCount2);
+    }
+
+    private async Task Setzero()
+    {
+        currentCount = 0;
+        await ProtectedLocalStore.SetAsync("count", currentCount);
+    }
+
+    public double MyFunction( double x )
+    {
+        return Math.Sin( x ) + Math.Pow( x, 3 ) / Math.PI;
+    }
+
+    private async Task integralf()
+    {
+        var d = new Func<double, double>( MyFunction );
+        var f = new OneVariableFunction( d );
+        f.Integrator = new GaussKronrodIntegrator();
+        double integral = f.Integrate( 0, 20*Math.PI );
+        for (int i = 0; i < 500; i++) 
+        {
+            Console.WriteLine(integral);
+        }
+    }
+
+}
